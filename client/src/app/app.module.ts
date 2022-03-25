@@ -1,4 +1,5 @@
-import { HttpClientModule } from '@angular/common/http';
+import { ErrorInterceptor } from './_interceptors/error.interceptor';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
@@ -16,6 +17,9 @@ import { ListsComponent } from './lists/lists.component';
 import { MessagesComponent } from './messages/messages.component';
 import { ToastrModule, ToastrService } from 'ngx-toastr';
 import { SharedModule } from './shared.module';
+import { TestErrorComponent } from './errors/test-error/test-error.component';
+import { NotFoundComponent } from './errors/not-found/not-found.component';
+import { ServerErrorComponent } from './errors/server-error/server-error.component';
 
 
 @NgModule({
@@ -28,6 +32,9 @@ import { SharedModule } from './shared.module';
     MemberDetailComponent,
     ListsComponent,
     MessagesComponent,
+    TestErrorComponent,
+    NotFoundComponent,
+    ServerErrorComponent,
   ],
   imports: [
     BrowserModule,
@@ -38,7 +45,9 @@ import { SharedModule } from './shared.module';
     SharedModule
    
   ],
-  providers: [],
+  providers: [
+    {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true}
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule { }
