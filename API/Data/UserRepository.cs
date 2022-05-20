@@ -9,6 +9,7 @@ using API.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace API.Data
 {
@@ -32,6 +33,9 @@ namespace API.Data
 
         public async Task<PagedList<MemberDto>> GetMembersAsync(UserParams userParams)
         {
+            try
+            {
+            
             var query = _context.Users.AsQueryable();
 
 
@@ -52,7 +56,11 @@ namespace API.Data
             return await PagedList<MemberDto>.CreateAsync(query.ProjectTo<MemberDto>(_mapper
                 .ConfigurationProvider).AsNoTracking(),
              userParams.PageNumber, userParams.PageSize);
-            
+            }
+            catch(Exception e)
+            {
+                throw e;
+            }
         }
 
         public async Task<AppUser> GetUserByIdAsync(int id)
