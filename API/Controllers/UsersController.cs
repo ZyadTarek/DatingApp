@@ -29,8 +29,8 @@ namespace API.Controllers
             _mapper = mapper;
             _userRepository = userRepository;
         }
+
         [HttpGet]
-        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers([FromQuery] UserParams userParams)
         {   
             var user = await _userRepository.GetUserByUsernameAsync(User.GetUsername());
@@ -44,7 +44,7 @@ namespace API.Controllers
              users.TotalCount, users.TotalPages);
             return Ok(users);
         }
-        [Authorize]
+    
         [HttpGet("{username}", Name = "GetUser")]
         public async Task<ActionResult<MemberDto>> GetUser(string username)
         {
