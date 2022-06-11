@@ -1,0 +1,17 @@
+<div class="card mb-4">
+    <div class="card-header">
+        <h6 class="card-title text-center mb-1">
+            {{photo?.username}}
+        </h6>
+      </div>
+    <div class="card-body p-1">
+            <img style="height:150px;" src="{{photo.url || './assets/user.png'}}" alt="{{photo?.username}}" class="card-img-top">
+    </div>
+    <div class="card-footer">
+        <div class="btn-group d-flex mr-2">
+            <button type="button" class="btn btn-success" (click)="approvePhoto()">Approve</button>
+            <button type="button" class="btn btn-danger" (click)="rejectPhoto()">Reject</button>
+        </div>
+    </div>
+   
+</div>

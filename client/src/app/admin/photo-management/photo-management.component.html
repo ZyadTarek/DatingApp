@@ -1,1 +1,9 @@
-<p>photo-management works!</p>
+<div class="row" *ngIf="unapprovedPhotos?.length === 0">
+   <h6 class="text-center">No Pending Photos Approval.</h6> 
+</div>
+
+<div *ngIf="unapprovedPhotos?.length > 0" class="row">
+    <div *ngFor="let photo of unapprovedPhotos" class="col-3">
+        <app-photo-approval-card (photoStatusChanged)="onPhotoStatusChange($event)" [photo]= photo></app-photo-approval-card>
+    </div>
+</div>

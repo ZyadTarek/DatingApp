@@ -9,3 +9,16 @@ img.img-thumbnail {
 input[type=file] {
     color: transparent;
 }
+.img-not-approved {
+    opacity: 0.2;
+    cursor: not-allowed;
+}
+
+.awaiting-approval-text{
+    position: absolute;
+    color: red;
+    font-size: 10px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}

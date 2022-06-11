@@ -1,11 +1,13 @@
+import { AdminService } from 'src/app/_services/admin.service';
 import { MembersService } from 'src/app/_services/members.service';
 import { Member } from './../../_models/member';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { FileUploader } from 'ng2-file-upload';
 import { environment } from 'src/environments/environment';
 import { AccountService } from 'src/app/_services/account.service';
 import { User } from 'src/app/_models/user';
 import { take } from 'rxjs/operators';
+import { ConfirmService } from 'src/app/_services/confirm.service';
 
 @Component({
   selector: 'app-photo-editor',
@@ -18,8 +20,10 @@ export class PhotoEditorComponent implements OnInit {
   hasBaseDropzoneOver = false;
   baseUrl = environment.apiUrl;
   user: User;
+  tooltip: string = "This photo is waiting admin\'s approval";
 
-  constructor(private accountService: AccountService, private memberService: MembersService) { 
+  constructor(private accountService: AccountService, private memberService: MembersService,
+   private confirmService: ConfirmService) { 
    this.accountService.currentUser$.pipe(take(1)).subscribe(user => this.user = user); 
   }
 
@@ -44,9 +48,14 @@ export class PhotoEditorComponent implements OnInit {
   }
 
   deletePhoto(photoId: number){
-   this.memberService.deletePhoto(photoId).subscribe(() => {
-     this.member.photos = this.member.photos.filter(x => x.id !== photoId);
-   });
+  this.confirmService.confirm('Delete Photo','Are you sure you want to delete this photo?','Yes','No')
+  .subscribe(result => {
+      if(result){
+       this.memberService.deletePhoto(photoId).subscribe(() => {
+         this.member.photos = this.member.photos.filter(x => x.id !== photoId);
+         });
+      }
+    }) 
   }
 
   intializeUploader() {

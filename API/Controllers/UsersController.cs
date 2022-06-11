@@ -48,7 +48,7 @@ namespace API.Controllers
         [HttpGet("{username}", Name = "GetUser")]
         public async Task<ActionResult<MemberDto>> GetUser(string username)
         {
-            return await _unitOfWork.UserRepository.GetMemberAsync(username);
+            return await _unitOfWork.UserRepository.GetMemberAsync(username, User.GetUsername() == username);
         }
         [HttpPut]
         public async Task<ActionResult> UpdateUser(MemberUpdateDto memberUpdateDto)
@@ -76,11 +76,9 @@ namespace API.Controllers
               Url = result.SecureUrl.AbsoluteUri,
               PublicId = result.PublicId
             };
-            if(user.Photos.Count == 0)
-            {
-                photo.IsMain = true;
-            }
+
             user.Photos.Add(photo);
+
             if(await _unitOfWork.Complete())
             {
                 return CreatedAtRoute("GetUser", new {username = user.UserName} ,_mapper.Map<PhotoDto>(photo));
@@ -90,14 +88,21 @@ namespace API.Controllers
         [HttpPut("set-main-photo/{photoId}")]
         public async Task<ActionResult> SetMainPhoto(int photoId)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var allowAllPhotos = true;
 
-            var photo = user.Photos.FirstOrDefault(x => x.Id == photoId);
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), allowAllPhotos);
+            
+            if(!(await _unitOfWork.PhotosRepository.GetPhotoById(photoId)).IsApproved && !allowAllPhotos) return BadRequest("Photo is still pending admin\'s approval");
 
-            if(photo.IsMain) return BadRequest("This is already your main photo");
+            var newMainPhoto = user.Photos.FirstOrDefault(p => p.Id == photoId);
+            
+
+            if(newMainPhoto.IsMain) return BadRequest("This is already your main photo");
+
             var currentMain = user.Photos.FirstOrDefault( x => x.IsMain);
+
             if(currentMain != null) currentMain.IsMain = false;
-            photo.IsMain = true;
+            newMainPhoto.IsMain = true;
 
             if(await _unitOfWork.Complete()) return NoContent();
 
@@ -107,7 +112,11 @@ namespace API.Controllers
         [HttpDelete("delete-photo/{photoId}")]
         public async Task<ActionResult> DeletePhoto(int photoId) 
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+             var allowAllPhotos = true;
+
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), allowAllPhotos);
+
+            if(!(await _unitOfWork.PhotosRepository.GetPhotoById(photoId)).IsApproved && !allowAllPhotos) return BadRequest("Photo is still pending admin\'s approval");
 
             var photo = user.Photos.FirstOrDefault(x => x.Id == photoId);
 

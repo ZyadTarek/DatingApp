@@ -23,12 +23,26 @@ namespace API.Data
             _context = context;
         }
 
-        public async Task<MemberDto> GetMemberAsync(string username)
+        public async Task<MemberDto> GetMemberAsync(string username, bool IsCurrentUser)
         {
-            return await _context.Users
+            var query = _context.Users
             .Where(user => user.UserName == username)
             .ProjectTo<MemberDto>(_mapper.ConfigurationProvider)
-            .SingleOrDefaultAsync();
+            .AsQueryable();
+            
+            if(IsCurrentUser) query = query.IgnoreQueryFilters();
+
+            return await query.SingleOrDefaultAsync();
+        }
+
+        public async Task<MemberDto> GetMemberByPhotoIdAsync(int id)
+        {
+            var photo = await _context.Photos
+                .IgnoreQueryFilters()
+                .ProjectTo<PhotoForApprovalDto>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync(p => p.Id == id);
+            
+            return await GetMemberAsync(photo.Username, false);
         }
 
         public async Task<PagedList<MemberDto>> GetMembersAsync(UserParams userParams)
@@ -68,11 +82,13 @@ namespace API.Data
             return await _context.Users.FindAsync(id);
         }
 
-        public async Task<AppUser> GetUserByUsernameAsync(string username)
+        public async Task<AppUser> GetUserByUsernameAsync(string username, bool allowAllPhotos )
         {
-            return await _context.Users
-            .Include(x => x.Photos)
-            .SingleOrDefaultAsync(user => user.UserName == username);
+            var query = _context.Users.Include(x => x.Photos).AsQueryable();
+            
+            if(allowAllPhotos) query = query.IgnoreQueryFilters();
+            
+            return await query.SingleOrDefaultAsync(user => user.UserName == username);
         }
 
         public async Task<string> GetUserGender(string username)
