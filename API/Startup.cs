@@ -57,7 +57,7 @@ namespace API
             app.UseCors(x => x.AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials()
-                .WithOrigins("https://my--dating--app.herokuapp.com/"));
+                .WithOrigins("https://localhost:4200","https://my--dating--app.herokuapp.com/"));
 
             app.UseAuthentication();
             
